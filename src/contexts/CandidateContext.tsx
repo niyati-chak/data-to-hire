@@ -12,7 +12,6 @@ interface CandidateContextType {
   addFilter: (filter: FilterConfig) => void;
   removeFilter: (column: string) => void;
   updateFilter: (column: string, value: any) => void;
-  clearAllFilters: () => void;
   updateCandidateStatus: (id: string, status: string) => void;
   addCandidateNote: (id: string, note: string) => void;
   addCandidateTag: (id: string, tag: string) => void;
@@ -52,20 +51,11 @@ export const CandidateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           case 'text':
           case 'email':
           case 'url':
-            // Check if it's a multi-select filter (array)
-            if (Array.isArray(filterValue)) {
-              return filterValue.includes(String(value));
-            }
             return String(value || '').toLowerCase().includes(String(filterValue).toLowerCase());
           case 'number':
-          case 'rating':
-            if (Array.isArray(filterValue) && filterValue.length === 2) {
+            if (Array.isArray(filterValue)) {
               const numValue = Number(value);
               return numValue >= filterValue[0] && numValue <= filterValue[1];
-            }
-            // Check if it's a multi-select filter for categorical numbers
-            if (Array.isArray(filterValue)) {
-              return filterValue.includes(String(value));
             }
             return Number(value) === Number(filterValue);
           case 'date':
@@ -76,6 +66,8 @@ export const CandidateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
             return true;
           case 'boolean':
             return value === filterValue;
+          case 'rating':
+            return Number(value) >= Number(filterValue);
           default:
             return true;
         }
@@ -103,10 +95,6 @@ export const CandidateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setFilters(prev => prev.map(f => 
       f.column === column ? { ...f, value } : f
     ));
-  }, []);
-
-  const clearAllFilters = useCallback(() => {
-    setFilters([]);
   }, []);
 
   const updateCandidateStatus = useCallback((id: string, status: string) => {
@@ -195,7 +183,6 @@ export const CandidateProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         addFilter,
         removeFilter,
         updateFilter,
-        clearAllFilters,
         updateCandidateStatus,
         addCandidateNote,
         addCandidateTag,
