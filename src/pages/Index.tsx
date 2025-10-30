@@ -8,10 +8,11 @@ import { FilterPanel } from '@/components/FilterPanel';
 import { AnalyticsDashboard } from '@/components/AnalyticsDashboard';
 import { CandidateData } from '@/types/candidate';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 
 const DashboardContent: React.FC = () => {
-  const { candidates, filteredCandidates, schema } = useCandidates();
+  const { candidates, filteredCandidates, schema, clearAllFilters, filters } = useCandidates();
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateData | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -131,11 +132,29 @@ const DashboardContent: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="text-center py-12"
+                  className="text-center py-16"
                 >
-                  <p className="text-muted-foreground text-lg">
-                    No candidates match your filters
-                  </p>
+                  <div className="max-w-md mx-auto space-y-4">
+                    <div className="text-6xl mb-4">🔍</div>
+                    <h3 className="text-xl font-semibold text-foreground">No candidates found</h3>
+                    <p className="text-muted-foreground">
+                      {filters.length > 0 || searchQuery 
+                        ? "No candidates match your current filters or search query."
+                        : "Try adjusting your search or filters."}
+                    </p>
+                    {(filters.length > 0 || searchQuery) && (
+                      <Button 
+                        onClick={() => {
+                          clearAllFilters();
+                          setSearchQuery('');
+                        }}
+                        variant="outline"
+                        className="mt-4"
+                      >
+                        Clear all filters
+                      </Button>
+                    )}
+                  </div>
                 </motion.div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -145,7 +164,7 @@ const DashboardContent: React.FC = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ delay: Math.min(index * 0.03, 0.3) }}
                     >
                       <CandidateCard
                         candidate={candidate}

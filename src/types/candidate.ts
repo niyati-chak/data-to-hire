@@ -5,6 +5,8 @@ export interface ColumnSchema {
   type: FieldType;
   visible: boolean;
   primary: boolean;
+  uniqueValues?: number;
+  options?: string[];
 }
 
 export interface CandidateStatus {
